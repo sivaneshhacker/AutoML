@@ -1,0 +1,13 @@
+
+        <br><br>
+
+        Target:
+        <br><br>
+
+        Task:
+        <select name="task">
+            <option value="regression">Regression</option>
+            <option value="classification">Classification</option>
+        </select><br><br>
+
+        <button type="submit">Run Pipeline</button>

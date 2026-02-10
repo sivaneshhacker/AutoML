@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Pipeline - Upload & Configure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step {
+            margin-bottom: 40px;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .step.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.3em;
+        }
+
+        .step-title {
+            font-size: 1.6em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 50px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .upload-icon {
+            font-size: 5em;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.3em;
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 1em;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            background: #f0f2ff;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .file-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .columns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .column-card {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .column-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .column-card.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #764ba2;
+        }
+
+        .column-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        .column-type {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .column-info {
+            font-size: 0.75em;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .action-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .secondary-button {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .secondary-button:hover:not(:disabled) {
+            background: #f8f9ff;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 ML Pipeline System</h1>
+            <p>Upload, Analyze, and Train Models on Your Data</p>
+        </div>
+
+        <div class="content">
+            <div class="alert" id="alert"></div>
+
+            <!-- Step 1: Upload Dataset -->
+            <div class="step active" id="step1">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Upload Dataset</div>
+                </div>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-subtext">CSV files only (max 100MB)</div>
+                    <input type="file" id="fileInput" accept=".csv">
+                </div>
+                <div class="file-info" id="fileInfo">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-stats">
+                        <div class="stat">
+                            <div class="stat-label">Rows</div>
+                            <div class="stat-value" id="rowCount">0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Columns</div>
+                            <div class="stat-value" id="colCount">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="loading" id="uploadLoading">
+                    <div class="spinner"></div>
+                    <p>Processing file...</p>
+                </div>
+            </div>
+
+            <!-- Step 2: Select Target Column -->
+            <div class="step" id="step2">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Select Target Column</div>
+                </div>
+                <div class="columns-grid" id="columnsGrid"></div>
+            </div>
+
+            <!-- Step 3: Choose ML Task -->
+            <div class="step" id="step3">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Choose ML Task</div>
+                </div>
+                <select id="mlTaskSelect">
+                    <option value="">Select a machine learning task...</option>
+                    <option value="classification">Classification</option>
+                    <option value="regression">Regression</option>
+                </select>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group" style="display: none;" id="actionButtons">
+                <button class="action-button" id="trainModelsButton">
+                    🚀 Train Models
+                </button>
+            </div>
+
+            <div class="loading" id="processingLoading">
+                <div class="spinner"></div>
+                <p id="processingText">Processing...</p>
+            </div>
+        </div>
+    </div>
+    
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+        
+        let uploadedFile = null;  // Store the actual File object
+        let selectedTarget = null;
+        let selectedTask = null;
+        let columnDetails = [];
+
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInfo = document.getElementById('fileInfo');
+        const columnsGrid = document.getElementById('columnsGrid');
+        const mlTaskSelect = document.getElementById('mlTaskSelect');
+        const uploadLoading = document.getElementById('uploadLoading');
+        const processingLoading = document.getElementById('processingLoading');
+        const actionButtons = document.getElementById('actionButtons');
+        const alert = document.getElementById('alert');
+
+        // Upload area handlers
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#764ba2';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#667eea';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#667eea';
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                handleFile(file);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        // Handle file upload - parse CSV locally to show preview
+        async function handleFile(file) {
+            uploadLoading.classList.add('show');
+            
+            // Store the file object for later use
+            uploadedFile = file;
+
+            try {
+                // Read and parse CSV locally for preview
+                const text = await file.text();
+                const lines = text.trim().split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                
+                // Simple column analysis
+                const rows = lines.length - 1;
+                const columns = headers.length;
+                
+                // Analyze each column
+                columnDetails = headers.map((header, idx) => {
+                    const values = lines.slice(1).map(line => {
+                        const cols = line.split(',');
+                        return cols[idx] ? cols[idx].trim() : '';
+                    });
+                    
+                    const unique = new Set(values.filter(v => v !== '')).size;
+                    const missing = values.filter(v => v === '').length;
+                    
+                    // Simple type detection
+                    const isNumeric = values.slice(0, 10).every(v => 
+                        v === '' || !isNaN(parseFloat(v))
+                    );
+                    
+                    return {
+                        name: header,
+                        type: isNumeric ? 'numeric' : 'categorical',
+                        unique: unique,
+                        missing: missing
+                    };
+                });
+
+                displayFileInfo(file.name, { rows, columns });
+                displayColumns(columnDetails);
+                activateStep('step2');
+                showAlert('File loaded successfully!', 'success');
+                
+            } catch (error) {
+                showAlert('Error reading file: ' + error.message, 'error');
+            } finally {
+                uploadLoading.classList.remove('show');
+            }
+        }
+
+        // Display file info
+        function displayFileInfo(fileName, data) {
+            document.getElementById('fileName').textContent = `📄 ${fileName}`;
+            document.getElementById('rowCount').textContent = data.rows;
+            document.getElementById('colCount').textContent = data.columns;
+            fileInfo.classList.add('show');
+        }
+
+        // Display columns as cards
+        function displayColumns(columns) {
+            columnsGrid.innerHTML = '';
+            columns.forEach((col) => {
+                const card = document.createElement('div');
+                card.className = 'column-card';
+                card.innerHTML = `
+                    <div class="column-name">${col.name}</div>
+                    <div class="column-type">${col.type}</div>
+                    <div class="column-info">Missing: ${col.missing} | Unique: ${col.unique}</div>
+                `;
+                card.addEventListener('click', () => selectTarget(col.name, card));
+                columnsGrid.appendChild(card);
+            });
+        }
+
+        // Select target column
+        function selectTarget(column, card) {
+            document.querySelectorAll('.column-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedTarget = column;
+            activateStep('step3');
+        }
+
+        // ML Task selection
+        mlTaskSelect.addEventListener('change', () => {
+            if (mlTaskSelect.value && selectedTarget) {
+                selectedTask = mlTaskSelect.value;
+                actionButtons.style.display = 'flex';
+            }
+        });
+
+        // Train Models - Updated to use /run-pipeline/ endpoint
+        document.getElementById('trainModelsButton').addEventListener('click', async () => {
+            if (!selectedTarget || !selectedTask || !uploadedFile) {
+                showAlert('Please complete all steps', 'error');
+                return;
+            }
+
+            processingLoading.classList.add('show');
+            document.getElementById('processingText').textContent = 'Training Models... This may take a few minutes.';
+
+            try {
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('file', uploadedFile);
+                formData.append('target', selectedTarget);
+                formData.append('task', selectedTask);
+
+                for (let pair of formData.entries()) {
+                    console.log(pair[0], pair[1]);
+                }
+                
+                for (let pair of formData.entries()) {
+                    console.log(pair[0], pair[1]);
+}                // Call the pipeline endpoint
+                const response = await fetch(`${API_URL}/run-pipeline`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store results in sessionStorage for the results page
+                    sessionStorage.setItem('pipelineResults', JSON.stringify(data));
+                    
+                    showAlert('Models trained successfully! Redirecting to results...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'model-results.html';
+                    }, 1500);
+                } else {
+                    showAlert('Training failed: ' + (data.detail || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showAlert('Error training models: ' + error.message, 'error');
+            } finally {
+                processingLoading.classList.remove('show');
+            }
+        });
+
+        // Activate step
+        function activateStep(stepId) {
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            alert.textContent = message;
+            alert.className = `alert ${type} show`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

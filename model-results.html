@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Pipeline - Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .leaderboard {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .leaderboard h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .leaderboard-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .leaderboard-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .leaderboard-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .leaderboard-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .plot-container {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .plot-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        .results-table tbody tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+
+        .results-table tbody tr:hover {
+            background: #e8ebff;
+        }
+
+        .results-table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .best-model {
+            background: #d4edda !important;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9ff;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-data h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Training Results</h1>
+            <p>Model Performance & Comparison</p>
+        </div>
+
+        <div class="content" id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading results...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load results from sessionStorage
+        const resultsData = sessionStorage.getItem('pipelineResults');
+
+        if (!resultsData) {
+            displayNoData();
+        } else {
+            try {
+                const data = JSON.parse(resultsData);
+                displayResults(data);
+            } catch (error) {
+                console.error('Error parsing results:', error);
+                displayError('Failed to load results. Please try again.');
+            }
+        }
+
+        function displayResults(data) {
+            const content = document.getElementById('content');
+            
+            // Build HTML
+            let html = '';
+
+            // Leaderboard
+            if (data.leaderboard) {
+                html += `
+                    <div class="leaderboard">
+                        <h2>🏆 Best Model</h2>
+                        <div class="leaderboard-content">
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-label">Model</div>
+                                <div class="leaderboard-value">${data.leaderboard.model}</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-label">${data.leaderboard.metric}</div>
+                                <div class="leaderboard-value">${data.leaderboard.value.toFixed(4)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Model Comparison Plot
+            if (data.plots && data.plots.model_comparison) {
+                html += `
+                    <div class="section">
+                        <h2 class="section-title">Model Comparison</h2>
+                        <div class="plot-container">
+                            <img src="data:image/png;base64,${data.plots.model_comparison}" alt="Model Comparison Plot">
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Results Table
+            if (data.results) {
+                html += `
+                    <div class="section">
+                        <h2 class="section-title">Detailed Results</h2>
+                        <div class="table-container">
+                            ${buildResultsTable(data.results, data.leaderboard)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Action Buttons
+            html += `
+                <div class="action-buttons">
+                    <a href="index.html" class="btn btn-primary">🔄 Train New Model</a>
+                    <button onclick="downloadResults()" class="btn btn-secondary">💾 Download Results</button>
+                </div>
+            `;
+
+            content.innerHTML = html;
+        }
+
+        function buildResultsTable(results, leaderboard) {
+            // Get all metrics from the first row
+            const metrics = Object.keys(results).filter(key => key !== 'Model');
+            const modelCount = Object.keys(results.Model).length;
+            
+            let tableHTML = '<table class="results-table"><thead><tr>';
+            
+            // Table headers
+            tableHTML += '<th>Model</th>';
+            metrics.forEach(metric => {
+                tableHTML += `<th>${metric.replace(/_/g, ' ')}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+            
+            // Table rows
+            for (let i = 0; i < modelCount; i++) {
+                const modelName = results.Model[i];
+                const isBest = leaderboard && modelName === leaderboard.model;
+                
+                tableHTML += `<tr class="${isBest ? 'best-model' : ''}">`;
+                tableHTML += `<td>${modelName}${isBest ? ' 🏆' : ''}</td>`;
+                
+                metrics.forEach(metric => {
+                    const value = results[metric][i];
+                    const displayValue = typeof value === 'number' ? value.toFixed(4) : value;
+                    tableHTML += `<td class="metric-value">${displayValue}</td>`;
+                });
+                
+                tableHTML += '</tr>';
+            }
+            
+            tableHTML += '</tbody></table>';
+            return tableHTML;
+        }
+
+        function displayNoData() {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="no-data">
+                    <h2>No Results Found</h2>
+                    <p>Please train a model first.</p>
+                    <div class="action-buttons">
+                        <a href="index.html" class="btn btn-primary">Go to Upload Page</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayError(message) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="no-data">
+                    <h2>Error</h2>
+                    <p>${message}</p>
+                    <div class="action-buttons">
+                        <a href="index.html" class="btn btn-primary">Go to Upload Page</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function downloadResults() {
+            const resultsData = sessionStorage.getItem('pipelineResults');
+            if (!resultsData) {
+                alert('No results to download');
+                return;
+            }
+
+            // Create downloadable JSON file
+            const blob = new Blob([resultsData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ml_pipeline_results_${new Date().getTime()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
